@@ -11,10 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140614155204) do
+ActiveRecord::Schema.define(version: 20140615143332) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "indicators", force: true do |t|
+    t.date     "day"
+    t.json     "indicators"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.json     "symbols_with_highest_rs"
+  end
+
+  add_index "indicators", ["day"], name: "index_indicators_on_day", unique: true, using: :btree
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false

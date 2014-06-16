@@ -80,3 +80,7 @@ pickle-email-*.html
 
 # Ignore application configuration
 /config/application.yml
+
+# RubyMine project files
+.idea
+/config/secrets.yml

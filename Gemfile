@@ -13,6 +13,7 @@ gem 'figaro'
 gem 'haml-rails'
 gem 'pg'
 gem 'simple_form'
+gem 'activerecord-import'
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_20]
@@ -29,7 +30,7 @@ group :development do
 end
 group :development, :test do
   gem 'factory_girl_rails'
-  gem 'pry-rails'
+  # gem 'pry-rails'
   gem 'pry-rescue'
   gem 'rspec-rails'
 end
