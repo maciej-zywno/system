@@ -1,12 +1,14 @@
 class Backtester
 
-  MA_PERIOD = 130
+  MA_PERIOD = 50
   INITIAL_CASH = 100 * 1000
   FEE = 0.0019
-  TRADE_PERIOD = 30
-  EQUITY_COUNT = 10
+  TRADE_PERIOD = 15
+  EQUITY_COUNT = 30
   SKIP_CHEAP_SHARE = false
-  SKIPPED_DAYS = [Date.new(2000,5,3),Date.new(2003,04,21),Date.new(2003,06,19),Date.new(2003,8,15),Date.new(2004,2,12), Date.new(2005,3,28),Date.new(2006,4,14), Date.new(2007,5,3), Date.new(2008,5,22),Date.new(2008,8,15),Date.new(2008,12,24),Date.new(2011,5,3),Date.new(2012,5,3),Date.new(2012,11,1),Date.new(2013,11,11),Date.new(2014,1,6)]
+  SKIPPED_DAYS = [Date.new(2001,4,13),Date.new(2002,5,30),Date.new(2003,04,21),Date.new(2003,06,19),Date.new(2004,2,12),
+                  Date.new(2005,3,28),Date.new(2006,4,14), Date.new(2008,5,22),
+                  Date.new(2014,1,6),Date.new(1999,12,29),Date.new(1999,12,30),Date.new(1999,12,31)]
   EXPECTED_VOLUME = 10 * 1000
 
   # TRADE_PERIOD = 20
@@ -23,7 +25,7 @@ class Backtester
     peak_days = [Date.new(1994,3,7),Date.new(1998,4,2),Date.new(2000,3,9),Date.new(2007,7,23),Date.new(2008,5,29),Date.new(2008,9,18),Date.new(2011,4,13)]
     start_day = peak_days[1]
     end_day = Date.new(2014,3,3)
-    all_trading_days = Indicator.order('indicators.day ASC').pluck(:day).reject{|day| SKIPPED_DAYS.include?(day)}
+    all_trading_days = Indicator.order('indicators.day ASC').pluck(:day).reject{|day| skip_day?(day)}
     start_index = all_trading_days.index(start_day)
     end_index = all_trading_days.index(end_day)
     raise 'foo' unless end_index
@@ -92,6 +94,14 @@ class Backtester
     my_puts("trade count=#{trades.length}", log=true)
   end
 
+  def skip_day?(day)
+    return true if SKIPPED_DAYS.include?(day)
+    return true if (day.month == 5 && (day.day == 1 || day.day == 3))
+    return true if (day.month == 11 && (day.day == 1 || day.day == 11))
+    return true if (day.month == 8 && day.day == 15)
+    return true if (day.month == 12 && day.day == 24)
+  end
+
   def symbols_with_highest_rs(day, expected_volume)
     if SKIP_CHEAP_SHARE
       potential_symbols = indicator(day).symbols_with_highest_rs[MA_PERIOD.to_s]
@@ -106,10 +116,18 @@ class Backtester
         end
         break if symbols_with_highest_rs.length >= EQUITY_COUNT
       end
-      raise "not enough symbols_with_highest_rs #{symbols_with_highest_rs.length}" if symbols_with_highest_rs.length < EQUITY_COUNT
+      if symbols_with_highest_rs.length < EQUITY_COUNT
+        puts day
+        puts potential_symbols.inspect
+        raise "not enough symbols_with_highest_rs #{symbols_with_highest_rs.length}"
+      end
       symbols_with_highest_rs
     else
-      indicator(day).symbols_with_highest_rs[MA_PERIOD.to_s].first(EQUITY_COUNT)
+      indicator = indicator(day)
+      unless indicator.symbols_with_highest_rs[MA_PERIOD.to_s]
+        puts "day=#{day}"
+      end
+      indicator.symbols_with_highest_rs[MA_PERIOD.to_s].first(EQUITY_COUNT)
     end
   end
 
