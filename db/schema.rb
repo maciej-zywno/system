@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140615143332) do
+ActiveRecord::Schema.define(version: 20140618002149) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20140615143332) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.json     "symbols_with_highest_rs"
+    t.json     "ohlcv_per_symbol"
   end
 
   add_index "indicators", ["day"], name: "index_indicators_on_day", unique: true, using: :btree

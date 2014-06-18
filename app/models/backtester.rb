@@ -20,7 +20,28 @@ class Backtester
   # 274 - 2008-09-18, balance:108850
   # 307 - 2011-04-13, balance:81317
 
+  def luki
+    peak_days = [Date.new(1994,3,7),Date.new(1998,4,2),Date.new(2000,3,9),Date.new(2007,7,23),Date.new(2008,5,29),Date.new(2008,9,18),Date.new(2011,4,13)]
+    start_day = peak_days[1]
+    end_day = Date.new(2014,3,3)
+    all_trading_days = Indicator.order('indicators.day ASC').pluck(:day).reject{|day| skip_day?(day)}
+    start_index = all_trading_days.index(start_day)
+    end_index = all_trading_days.index(end_day)
+    raise 'foo' unless end_index
+    all_trading_days_from_peak_day = all_trading_days[start_index..end_index]
+    next_day_per_day = next_day_per_day(all_trading_days)
 
+    all_trading_days_from_peak_day.each do |day|
+      next_day = next_day_per_day[day]
+      raise "no next_day found for #{day}" unless next_day
+      indicator = ohlc(indicator(next_day))
+      next_day_indicator = ohlc(indicator(next_day))
+    end
+  end
+
+  def ohlc(indicator)
+    indicator['130'].map{|hash| {symbol: hash['symbol'],symbol: hash['symbol'],symbol: hash['symbol']}}
+  end
   def run
     peak_days = [Date.new(1994,3,7),Date.new(1998,4,2),Date.new(2000,3,9),Date.new(2007,7,23),Date.new(2008,5,29),Date.new(2008,9,18),Date.new(2011,4,13)]
     start_day = peak_days[1]
