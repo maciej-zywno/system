@@ -1,8 +1,8 @@
 require 'csv'
 
 class Filler
-  MA_PERIODS = [50, 100, 130, 150, 200]
-  # MA_PERIODS = [130]
+  # MA_PERIODS = [50, 100, 130, 150, 200]
+  MA_PERIODS = [130]
   VOLUME_DAY_RANGES = [1]
   ROUND = 3
 
