@@ -42,7 +42,7 @@ class Executor
 
     def shares(symbol, cash, day, next_day_per_day)
       day, indicators = @repository.soonest_ohlcv(symbol, day, next_day_per_day)
-      (cash / indicators.ohlcv_per_symbol[symbol][:o]).round
+      (cash / indicators.ohlcv_per_symbol[symbol]['o']).round
     end
 
 end
