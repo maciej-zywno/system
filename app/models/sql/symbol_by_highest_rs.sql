@@ -1,6 +1,8 @@
 -- params: <period>, <day>, <minimum_c>, <minimum_v>, <record_limit>
 with tmp as (
-	select json_array_elements(indicators->'130') as t, ohlcv_per_symbol from indicators where day = '2014-06-13'
+	select json_array_elements(indicators->'<period>') as t, ohlcv_per_symbol
+	from indicators
+	where day = '<day>'
 )
 select t->>'symbol' as symbol
 from tmp
