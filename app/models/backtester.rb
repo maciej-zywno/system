@@ -1,6 +1,7 @@
 #http://www.highcharts.com/stock/demo/candlestick-and-volume
 class Backtester
 
+  MAX_NON_TRADING_DAY_FOR_SYMBOL = 40
   MA_PERIOD = 130
   INITIAL_CASH = 100 * 1000
   FEE = 0.0019
@@ -21,24 +22,12 @@ class Backtester
   # 274 - 2008-09-18, balance:108850
   # 307 - 2011-04-13, balance:81317
 
-  def initialize
-    @repository = Repository.new
-    @executor = Executor.new(@repository)
-    @helper = Helper.new
-  end
-
   def run
-    peak_days = [Date.new(1994,3,7),Date.new(1998,4,2),Date.new(2000,3,9),Date.new(2007,7,23),Date.new(2008,5,29),Date.new(2008,9,18),Date.new(2011,4,13)]
-    start_day = peak_days[1]
-    end_day = Date.new(2014,3,3)
-    all_trading_days = Indicator.order('indicators.day ASC').pluck(:day).reject{|day| skip_day?(day)}
-    start_index = all_trading_days.index(start_day)
-    end_index = all_trading_days.index(end_day)
-    raise 'foo' unless end_index
-    all_trading_days_from_peak_day = all_trading_days[start_index..end_index]
-    system_trigger_days = all_trading_days_from_peak_day.each_slice(TRADE_PERIOD).map(&:last)
-
+    all_trading_days, system_trigger_days = system_trigger_days
     next_day_per_day = next_day_per_day(all_trading_days)
+    @repository = Repository.new(MAX_NON_TRADING_DAY_FOR_SYMBOL, next_day_per_day)
+    @executor = Executor.new(@repository)
+    @helper = Helper.new(FEE)
 
     cash = INITIAL_CASH
     executed_orders = []
@@ -46,8 +35,7 @@ class Backtester
 
     system_trigger_days.each do |day|
       my_puts "DAY:#{day}", log=true
-      next_day = next_day_per_day[day]
-      raise "no next_day found for #{day}" unless next_day
+      raise "no next_day found for #{day}" unless next_day_per_day[day]
 
       symbols_with_highest_rs = symbols_with_highest_rs(day, EXPECTED_VOLUME)
 
@@ -58,7 +46,7 @@ class Backtester
       out_symbols.each do |symbol|
         shares = current_positions[symbol][:shares]
         puts "current_positions[symbol]=#{current_positions[symbol]}"
-        transactions = @executor.execute_sell_order(symbol, shares, next_day, next_day_per_day)
+        transactions = @executor.execute_sell_order(symbol, shares, next_day_per_day[day])
         order = @helper.wrap_in_order(transactions)
         cash = cash - order[:total_cost]
 
@@ -68,14 +56,27 @@ class Backtester
 
       cash_per_security = cash / in_symbols.length
       in_symbols.each do |symbol|
-        shares = shares_sought(symbol, cash_per_security, day, next_day_per_day)
-        transactions = @executor.execute_buy_order(symbol, shares, next_day, next_day_per_day)
+        shares = shares_sought(symbol, cash_per_security, day)
+        transactions = @executor.execute_buy_order(symbol, shares, next_day_per_day[day])
         order = @helper.wrap_in_order(transactions).merge(buy_signal_day: day)
         cash = cash - order[:total_cost]
         executed_orders << order
         current_positions[symbol] = order
       end
     end
+  end
+
+  def system_trigger_days
+    peak_days = [Date.new(1994, 3, 7), Date.new(1998, 4, 2), Date.new(2000, 3, 9), Date.new(2007, 7, 23), Date.new(2008, 5, 29), Date.new(2008, 9, 18), Date.new(2011, 4, 13)]
+    start_day = peak_days[1]
+    end_day = Date.new(2014, 3, 3)
+    all_trading_days = Indicator.order('indicators.day ASC').pluck(:day).reject { |day| skip_day?(day) }
+    start_index = all_trading_days.index(start_day)
+    end_index = all_trading_days.index(end_day)
+    raise 'foo' unless end_index
+    all_trading_days_from_peak_day = all_trading_days[start_index..end_index]
+    system_trigger_days = all_trading_days_from_peak_day.each_slice(TRADE_PERIOD).map(&:last)
+    return all_trading_days, system_trigger_days
   end
 
   def skip_day?(day)
@@ -121,8 +122,8 @@ class Backtester
     next_day_per_day
   end
 
-  def shares_sought(symbol, approximate_cash, day, next_day_per_day)
-    day, indicators = @repository.soonest_ohlcv(symbol, day, next_day_per_day)
+  def shares_sought(symbol, approximate_cash, day)
+    _, indicators = @repository.soonest_ohlcv(symbol, day)
     (approximate_cash / indicators['o']).round
   end
 

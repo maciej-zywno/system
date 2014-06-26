@@ -1,5 +1,9 @@
 class Helper
 
+  def initialize(fee)
+    @fee = fee
+  end
+
   def wrap_in_order(transactions)
     total_cost = 0
     shares = 0
@@ -14,7 +18,7 @@ class Helper
   private
 
     def total_cost(transaction)
-      transaction[:average_price] * transaction[:shares] * (1 + Backtester::FEE)
+      transaction[:average_price] * transaction[:shares] * (1 + @fee)
     end
 
 end
