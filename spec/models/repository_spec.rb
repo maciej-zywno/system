@@ -13,11 +13,11 @@ describe Repository do
 
   describe '.soonest_ohlcv' do
     before do
-      repository.stub(:ohlcv).with(day1, anything()) { 'ohlcv_1' }
-      repository.stub(:ohlcv).with(day2, anything()) { 'ohlcv_2' }
-      repository.stub(:ohlcv).with(day3, anything()) { 'ohlcv_3' }
-      repository.stub(:ohlcv).with(day4, anything()) { 'ohlcv_4' }
-      repository.stub(:ohlcv).with(day5, anything()) { 'ohlcv_5' }
+      allow(repository).to receive(:ohlcv).with(day1, anything()) { 'ohlcv_1' }
+      allow(repository).to receive(:ohlcv).with(day2, anything()) { 'ohlcv_2' }
+      allow(repository).to receive(:ohlcv).with(day3, anything()) { 'ohlcv_3' }
+      allow(repository).to receive(:ohlcv).with(day4, anything()) { 'ohlcv_4' }
+      allow(repository).to receive(:ohlcv).with(day5, anything()) { 'ohlcv_5' }
     end
 
     context 'for ohlvc present for the first day' do
@@ -30,7 +30,7 @@ describe Repository do
 
     context 'for ohlvc missing for the first day' do
       let(:day) { day2 }
-      before { repository.stub(:ohlcv).with(day2, anything()) { nil } }
+      before { allow(repository).to receive(:ohlcv).with(day2, anything()) { nil } }
 
       context 'but present for the following day' do
         subject { repository.send(:soonest_ohlcv, symbol, day) }
@@ -41,8 +41,8 @@ describe Repository do
 
       context 'and missing for 2(max_non_trading_day_for_symbol) days' do
         before do
-          repository.stub(:ohlcv).with(day3, anything()) { nil }
-          repository.stub(:ohlcv).with(day4, anything()) { nil }
+          allow(repository).to receive(:ohlcv).with(day3, anything()) { nil }
+          allow(repository).to receive(:ohlcv).with(day4, anything()) { nil }
         end
 
         it 'raises exception' do
@@ -53,8 +53,8 @@ describe Repository do
       context 'and missing for all days' do
         let(:day) { day4 }
         before do
-          repository.stub(:ohlcv).with(day4, anything()) { nil }
-          repository.stub(:ohlcv).with(day5, anything()) { nil }
+          allow(repository).to receive(:ohlcv).with(day4, anything()) { nil }
+          allow(repository).to receive(:ohlcv).with(day5, anything()) { nil }
         end
 
         it 'raises exception' do
