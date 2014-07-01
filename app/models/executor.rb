@@ -9,7 +9,7 @@ class Executor
   end
 
 
-  def execute_sell_order(symbol, shares, day)
+    def execute_sell_order(symbol, shares, day)
     return execute_order('sell', symbol, shares, day)
   end
 
@@ -22,14 +22,15 @@ class Executor
 
       current_day = day
       while traded_shares < shares
-        day, ohvlc = @repository.soonest_ohlcv(symbol, day)
-        average_price, transaction_shares = execute_transaction(shares - traded_shares, ohvlc, buy_or_sell)
-        transaction = {day: day, shares: transaction_shares, average_price: average_price }
+        day_shares = shares - traded_shares
+        transaction_day, ohvlc = @repository.soonest_ohlcv(symbol, current_day)
+        average_price, transaction_shares = execute_transaction(day_shares, ohvlc, buy_or_sell)
+        transaction = {day: transaction_day, shares: transaction_shares, average_price: average_price }
 
         transactions << transaction
         traded_shares += transaction[:shares]
 
-        current_day = @repository.next_day(current_day)
+        current_day = @repository.next_day(transaction_day)
       end
 
       return transactions
