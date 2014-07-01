@@ -13,7 +13,7 @@ class Repository
     current_day = day
     i = 0
     while ohvlc.nil?
-      current_day = @next_day_per_day[current_day]
+      current_day = next_day(current_day)
       ohvlc = ohlcv(current_day, symbol)
       raise "break_too_long for #{symbol}" if (i += 1) > @max_non_trading_day_for_symbol
     end
