@@ -23,7 +23,7 @@ class Backtester
   # 307 - 2011-04-13, balance:81317
 
   def run
-    all_trading_days, system_trigger_days = system_trigger_days
+    all_trading_days, system_trigger_days = get_system_trigger_days
     next_day_per_day = next_day_per_day(all_trading_days)
     @repository = Repository.new(MAX_NON_TRADING_DAY_FOR_SYMBOL, next_day_per_day)
     @executor = Executor.new(@repository)
@@ -66,7 +66,7 @@ class Backtester
     end
   end
 
-  def system_trigger_days
+  def get_system_trigger_days
     peak_days = [Date.new(1994, 3, 7), Date.new(1998, 4, 2), Date.new(2000, 3, 9), Date.new(2007, 7, 23), Date.new(2008, 5, 29), Date.new(2008, 9, 18), Date.new(2011, 4, 13)]
     start_day = peak_days[1]
     end_day = Date.new(2014, 3, 3)
