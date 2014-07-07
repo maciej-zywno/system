@@ -6,10 +6,6 @@ describe Executor do
   let(:executor) { Executor.new(repository) }
 
   describe '.execute_order' do
-    let(:ohlcv_1) { {'o'=> 2.2, 'h'=> 4.4, 'l'=> 1.1, 'c'=> 3.3, 'v'=> 10} }
-    let(:ohlcv_2) { {'o'=> 22.2, 'h'=> 44.4, 'l'=> 11.1, 'c'=> 33.3, 'v'=> 100} }
-    let(:ohlcv_3) { {'o'=> 222.2, 'h'=> 444.4, 'l'=> 111.1, 'c'=> 333.3, 'v'=> 1000} }
-
     before do
       allow(executor).to receive(:execute_next_transaction).with('buy_or_sell', 'symbol', 'day1', 111) {
         {day: 'day1', shares: 1, average_price: 'transaction_average_price_1'}
