@@ -72,7 +72,7 @@ namespace :backtest do
     }
 
     next_day_price_per_symbol_per_day = {}
-    CSV.parse(open('foo.csv')).each do |row|
+    CSV.parse(open('foo.csv')).each do |row| # foo.csv has 20 best (highest RS) stocks per each day
       day = row[0].to_i
       symbol = row[1].to_s
       next_day_price = row[4].to_f.round(2)
